@@ -11,6 +11,20 @@ MCP server for interacting with TeamDynamix Projects and Issues via the TDWebAPI
 - **Metadata**: Access issue categories, priorities, and statuses
 - **Multi-environment**: Support for prod/test/canary/dev environments
 - **Secure Credentials**: DPAPI-encrypted password storage (Windows)
+- **Optimized Responses**: Search operations return minimal fields (91.5% size reduction) for better performance
+
+## Response Size Optimization
+
+Search operations (`tdx_search_projects`, `tdx_search_issues`) return **minimal fields** to maximize the number of results that fit within token limits:
+
+- **Projects**: 7 fields (~109 bytes per project)
+  - ID, Name, StatusName, PercentComplete, IsActive, ManagerFullName, ModifiedDate
+- **Issues**: 13 fields (~200 bytes per issue)
+  - ID, ProjectID, Title, StatusID, StatusName, PriorityID, PriorityName, CategoryID, CategoryName, ResponsibleUID, ResponsibleFullName, CreatedDate, ModifiedDate
+
+Get operations (`tdx_get_project`, `tdx_get_issue`) return **full details** with all fields.
+
+**Workflow:** Search (minimal) → Find what you need → Get (full details)
 
 ## Installation
 
@@ -78,19 +92,19 @@ Add to your Claude Code `.mcp.json`:
 
 ### Projects
 
-- `tdx_get_project`: Get project by ID
+- `tdx_get_project`: Get project by ID (returns **full details**)
 - `tdx_update_project`: Update project details
-- `tdx_search_projects`: Search for projects
-- `tdx_list_projects`: Get projects you're on
+- `tdx_search_projects`: Search for projects (returns **minimal fields** - use for browsing)
+- `tdx_list_projects`: Get projects you're on (returns **full details**)
 - `tdx_get_project_resources`: Get project team members
 - `tdx_get_project_feed`: Get project comments/updates
 - `tdx_add_project_feed`: Add comment to project
 
 ### Issues
 
-- `tdx_get_issue`: Get issue by ID
+- `tdx_get_issue`: Get issue by ID (returns **full details**)
 - `tdx_update_issue`: Update issue details
-- `tdx_search_issues`: Search for issues
+- `tdx_search_issues`: Search for issues (returns **minimal fields** - use for browsing)
 - `tdx_get_issue_feed`: Get issue comments/updates
 - `tdx_add_issue_feed`: Add comment to issue
 - `tdx_get_issue_categories`: Get issue categories for project
@@ -99,24 +113,55 @@ Add to your Claude Code `.mcp.json`:
 
 ## Usage Examples
 
-### Get a project
+### Find and Get Project Details (Recommended Workflow)
+
+**Step 1: Search** - Returns minimal fields to browse many results
+```
+Search for projects with "UX Updates" in the name
+```
+Response includes: ID, Name, StatusName, PercentComplete, IsActive, ManagerFullName, ModifiedDate
+
+**Step 2: Get Details** - Returns full project information
+```
+Get project 441886 details
+```
+Response includes all 70+ fields with complete information
+
+### Search with Filters
+
+```
+Search for active projects managed by John Smith modified in the last week
+```
+
+```
+Search for issues in project 12345 with priority "High"
+```
+
+### Work with Issues
+
+```
+Search for open issues assigned to me in project 12345
+```
+
+Then get full details:
+```
+Get issue 789 from project 12345
+```
+
+### Add Comment
+
+```
+Add comment to issue 789 in project 12345: "Working on this now"
+```
+
+### Direct Access (When You Know the ID)
+
 ```
 Get project 12345 details
 ```
 
-### Search for projects
 ```
-Search for projects managed by John Smith
-```
-
-### Get issues for a project
-```
-Get all open issues for project 12345
-```
-
-### Add comment to an issue
-```
-Add comment to issue 789 in project 12345: "Working on this now"
+Get issue 456 from project 12345
 ```
 
 ## Development

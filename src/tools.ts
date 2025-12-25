@@ -27,7 +27,7 @@ export const tools: Tool[] = [
   // ===== Project Tools =====
   {
     name: 'tdx_get_project',
-    description: 'Get project by ID',
+    description: 'Get project by ID (returns full project details)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -55,7 +55,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'tdx_search_projects',
-    description: 'Search for projects',
+    description: 'Search for projects (returns minimal fields for browsing - use tdx_get_project for full details)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -72,19 +72,42 @@ export const tools: Tool[] = [
         statusIDs: {
           type: 'array',
           items: { type: 'number' },
-          description: 'Status IDs',
+          description: 'Filter by status IDs',
         },
         managerUIDs: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Manager UIDs',
+          description: 'Filter by manager UIDs',
+        },
+        typeIDs: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by project type IDs',
+        },
+        priorityIDs: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by priority IDs',
+        },
+        resourceUIDs: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by assigned resource UIDs',
+        },
+        modifiedDateFrom: {
+          type: 'string',
+          description: 'Filter by modified date (ISO 8601 format: YYYY-MM-DD)',
+        },
+        modifiedDateTo: {
+          type: 'string',
+          description: 'Filter by modified date (ISO 8601 format: YYYY-MM-DD)',
         },
       },
     },
   },
   {
     name: 'tdx_list_projects',
-    description: 'Get projects the user is on',
+    description: 'Get projects the user is on (returns minimal fields for browsing - use tdx_get_project for full details)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -106,7 +129,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'tdx_get_project_feed',
-    description: 'Get project feed entries',
+    description: 'Get project feed entries (returns metadata with body preview - excludes full Body field for efficiency)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -146,7 +169,7 @@ export const tools: Tool[] = [
   // ===== Issue Tools =====
   {
     name: 'tdx_get_issue',
-    description: 'Get issue by ID',
+    description: 'Get issue by ID (returns full issue details)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -176,7 +199,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'tdx_search_issues',
-    description: 'Search for issues',
+    description: 'Search for issues (returns minimal fields for browsing - use tdx_get_issue for full details)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -194,14 +217,37 @@ export const tools: Tool[] = [
         statusIDs: {
           type: 'array',
           items: { type: 'number' },
-          description: 'Status IDs',
+          description: 'Filter by status IDs',
+        },
+        priorityIDs: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by priority IDs',
+        },
+        categoryIDs: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by category IDs',
+        },
+        responsibleUIDs: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by responsible UIDs',
+        },
+        modifiedDateFrom: {
+          type: 'string',
+          description: 'Filter by modified date (ISO 8601 format: YYYY-MM-DD)',
+        },
+        modifiedDateTo: {
+          type: 'string',
+          description: 'Filter by modified date (ISO 8601 format: YYYY-MM-DD)',
         },
       },
     },
   },
   {
     name: 'tdx_get_issue_feed',
-    description: 'Get issue feed entries',
+    description: 'Get issue feed entries (returns metadata with body preview - excludes full Body field for efficiency)',
     inputSchema: {
       type: 'object',
       properties: {

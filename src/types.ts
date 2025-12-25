@@ -292,6 +292,11 @@ export interface SearchProjectsArgs extends ToolArgs {
   maxResults?: number;
   statusIDs?: number[];
   managerUIDs?: string[];
+  typeIDs?: number[];
+  priorityIDs?: number[];
+  resourceUIDs?: string[];
+  modifiedDateFrom?: string;
+  modifiedDateTo?: string;
 }
 
 export interface GetProjectResourcesArgs extends ToolArgs {
@@ -326,6 +331,11 @@ export interface SearchIssuesArgs extends ToolArgs {
   searchText?: string;
   maxResults?: number;
   statusIDs?: number[];
+  priorityIDs?: number[];
+  categoryIDs?: number[];
+  responsibleUIDs?: string[];
+  modifiedDateFrom?: string;
+  modifiedDateTo?: string;
 }
 
 export interface GetIssueFeedArgs extends ToolArgs {

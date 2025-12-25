@@ -12,6 +12,9 @@ dist/
 # Keep source TypeScript files
 !src/**/*.ts
 
+# Keep test scripts
+!tests/**/*.js
+
 # Environment and credentials
 .env
 *.credentials.json
@@ -40,3 +43,7 @@ coverage/
 temp/
 tmp/
 *.tmp
+
+# Local configuration
+.claude/
+.mcp.json

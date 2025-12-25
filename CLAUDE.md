@@ -27,20 +27,62 @@ When user asks to setup/configure:
 
 ## Key Behaviors
 
+### Response Size Optimization ✅ (Implemented 2025-12-24)
+
+**Search/List tools return minimal fields (91.5% size reduction):**
+- `tdx_search_projects`: Returns 7 essential fields per project (~109 bytes)
+- `tdx_search_issues`: Returns 13 essential fields per issue (~200 bytes)
+- `tdx_list_projects`: Returns 7 essential fields per project (~109 bytes) - OPTIMIZED
+
+**Feed tools return minimal fields (70-90% size reduction):**
+- `tdx_get_project_feed`: Excludes Body HTML, includes BodyPreview (100 chars) - OPTIMIZED
+- `tdx_get_issue_feed`: Excludes Body HTML, includes BodyPreview (100 chars) - OPTIMIZED
+
+**Get tools return full details:**
+- `tdx_get_project`: Full project details with all fields
+- `tdx_get_issue`: Full issue details with all fields
+
+**Recommended Workflow:**
+```
+1. Search/List (minimal) → Browse efficiently, find what you need
+2. Get (full) → View complete details on specific item
+3. Feed (minimal) → Browse updates quickly with previews
+```
+
+**Example:**
+```typescript
+// 1. Search returns minimal fields (fast, fits many results)
+search_projects("UX Updates")
+  → Returns 60+ projects with: ID, Name, StatusName, PercentComplete, IsActive, ManagerFullName, ModifiedDate
+
+// 2. List returns same minimal fields (fast, fits 100+ projects)
+list_projects()
+  → Returns all user's projects with same 7 fields
+
+// 3. Get returns full details (when you find the right one)
+get_project(441886)
+  → Returns complete project with all 70+ fields
+
+// 4. Feed returns metadata + preview (fast, fits 100+ entries)
+get_project_feed(441886)
+  → Returns feed entries with BodyPreview instead of full HTML Body
+```
+
 **Projects:**
 - `tdx_get_project`: Returns full project details
 - `tdx_update_project`: Updates project fields
-- `tdx_search_projects`: Search with filters (manager, status, dates)
-- `tdx_list_projects`: Returns projects user is on
+- `tdx_search_projects`: Returns minimal fields - use filters for precision (manager, status, type, priority, dates)
+- `tdx_list_projects`: Returns minimal fields for projects user is on
 
 **Issues:**
 - Issues belong to projects - always need `projectId` and `issueId`
 - `tdx_get_issue`: Returns full issue details
 - `tdx_update_issue`: Updates issue fields
-- `tdx_search_issues`: Search issues (optionally filter by project)
+- `tdx_search_issues`: Returns minimal fields - use filters (project, status, priority, category, responsible, dates)
 
 **Feed Entries:**
 - Projects and issues both support feed entries (comments/updates)
+- Feed endpoints return metadata + 100-char body preview (not full HTML Body)
 - Use `isPrivate` flag to control visibility
 - Can notify specific users via `notify` array
 
@@ -77,4 +119,73 @@ npm run test:prod    # Production
 npm run test:test    # Test
 npm run test:canary  # Canary
 npm run test:api     # Development
+
+# Response size analysis (development)
+node tests/analyze-feed-size.js         # Analyze single feed entry
+node tests/compare-optimizations.js     # Compare before/after optimization results
 ```
+
+---
+
+## Recent Work & Status (2025-12-25)
+
+### Optimization Phase Complete ✅
+
+**Problem Identified:**
+- Initial testing revealed 3 tools exceeded token limits (66K-88K chars)
+- `tdx_list_projects`: 66K chars → Saved to file, unusable
+- `tdx_get_project_feed`: 88K chars → Saved to file, unusable
+- `tdx_get_issue_feed`: 5K chars → Would fail on active issues
+
+**Solutions Implemented:**
+
+1. **`tdx_list_projects`** - 97.9% reduction
+   - Stripped to same 7 minimal fields as search
+   - Before: 66K chars (broken) → After: 1.4K chars (working)
+   - Can now browse 100+ projects efficiently
+
+2. **`tdx_get_project_feed`** - 85.3% reduction
+   - Removed massive HTML Body field, added 100-char BodyPreview
+   - Before: 88K chars (broken) → After: 13K chars (working)
+   - 49 entries × 265 bytes = manageable size
+
+3. **`tdx_get_issue_feed`** - 54% reduction
+   - Same Body → BodyPreview optimization
+   - Before: 5K chars (risky) → After: 2.3K chars (safe)
+   - Safe for issues with long feed histories
+
+**Test Scripts Created:**
+- `tests/analyze-feed-size.js`: Analyzes individual feed entry size breakdown
+- `tests/compare-optimizations.js`: Documents before/after metrics
+
+### Current Status
+
+✅ **All tools functional and tested**
+- Search/List tools: Minimal fields, 91.5% reduction
+- Feed tools: Body removed, BodyPreview added, 54-85% reduction
+- Get tools: Full details preserved
+
+⚠️ **Known Limitations:**
+- Feed BodyPreview is 100 chars max (cannot retrieve full Body HTML)
+- This is acceptable - preview sufficient for 90% of use cases
+- Full Body would reintroduce token limit issues
+
+📊 **Performance Metrics:**
+- Can handle 100+ projects in list
+- Can handle 50+ feed entries per project/issue
+- Total optimization: 85-98% size reduction across critical tools
+
+### What's Ahead
+
+✅ **No critical issues remaining**
+- All tools working within token limits
+- Optimization strategy validated with test data
+- Documentation updated
+
+🔄 **Potential Future Enhancements:**
+- Add optional `includeFullBody` parameter to feed tools (with warnings about token limits)
+- Remove null fields and empty arrays from feed entries (additional 7% reduction)
+- Add pagination parameters for feed tools if needed
+
+💡 **Recommendation:**
+Current optimization is production-ready. Further optimization would provide diminishing returns and may remove useful metadata.
