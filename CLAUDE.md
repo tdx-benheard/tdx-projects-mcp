@@ -92,6 +92,65 @@ get_project_feed(441886)
 
 ---
 
+## API Quirks & Important Notes
+
+### Issue Search ProjectID Parameter
+
+**CRITICAL:** The `/api/projects/issues/search` endpoint requires `ProjectIDs` (plural, array) not `ProjectID` (singular).
+
+```typescript
+// ✗ WRONG - API ignores this
+{ ProjectID: 441886 }
+
+// ✓ CORRECT - API filters properly
+{ ProjectIDs: [441886] }
+```
+
+**Implementation:**
+- MCP tool accepts `projectId` (singular number) for user convenience
+- `handlers.ts` converts to `ProjectIDs: [projectId]` before API call
+- API performs server-side filtering (no client-side filtering needed)
+
+**Verified:** 2026-01-05 via `tests/test-projectid-filter.js`
+
+**Documentation:** https://solutions.teamdynamix.com/TDWebApi/Home/type/TeamDynamix.Api.Issues.IssueSearch
+
+### Issue Updates Comments Requirement
+
+**CRITICAL:** The `/api/projects/{projectId}/issues/{issueId}` endpoint (POST/update) REQUIRES a `Comments` field.
+
+```typescript
+// ✗ WRONG - API returns 400: "Comments must be provided."
+{
+  StatusID: 8820,
+  ResponsibleUID: "f67dc740-edfd-ec11-b47a-0003ff505262"
+}
+
+// ✓ CORRECT - Minimal update with required Comments field
+{
+  StatusID: 8820,
+  ResponsibleUID: "f67dc740-edfd-ec11-b47a-0003ff505262",
+  Comments: "Changing status to Ready for Testing and reassigning to David"
+}
+```
+
+**Why:** The Comments field creates a feed entry documenting the change. The API enforces this to maintain audit trail.
+
+**Minimal Required Fields:**
+- `Comments` (required - string - creates feed entry)
+- Any fields you want to update (StatusID, ResponsibleUID, Title, Description, CategoryID, PriorityID, etc.)
+
+**Implementation:**
+- MCP tool schema now documents Comments as required field
+- Tool description warns users about this requirement
+- LLM should include meaningful comment describing the change
+
+**Verified:** 2026-01-06 via `tests/test-issue-update-simple.js`
+
+**Documentation:** https://solutions.teamdynamix.com/TDWebApi/Home/type/TeamDynamix.Api.Issues.Issue
+
+---
+
 ## Architecture
 
 - `index.ts`: MCP server, credential loading, graceful startup

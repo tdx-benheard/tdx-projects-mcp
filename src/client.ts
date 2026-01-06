@@ -244,6 +244,10 @@ export class TDXClient {
   /**
    * Search for issues.
    *
+   * Note: The TDX API requires ProjectIDs (plural, array) not ProjectID (singular).
+   * The handlers layer converts projectId to ProjectIDs=[projectId] before calling this.
+   * Verified: 2026-01-05 via tests/test-projectid-filter.js
+   *
    * @param searchParams - Search parameters
    * @returns Array of matching issues
    */

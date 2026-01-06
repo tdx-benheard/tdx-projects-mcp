@@ -182,7 +182,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'tdx_update_issue',
-    description: 'Update issue',
+    description: 'Update issue. IMPORTANT: Comments field is REQUIRED by the API (creates a feed entry). Include any fields you want to update (StatusID, ResponsibleUID, Title, Description, CategoryID, PriorityID, etc.).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -191,7 +191,38 @@ export const tools: Tool[] = [
         ...issueIdParam,
         issueData: {
           type: 'object',
-          description: 'Issue data to update',
+          description: 'Issue data to update. Must include Comments field (required by API). Optional fields: StatusID, ResponsibleUID, Title, Description, CategoryID, PriorityID, Resolution, ImpactID, ResponsibleGroupID.',
+          properties: {
+            Comments: {
+              type: 'string',
+              description: 'REQUIRED: Comment text that will be added to the issue feed',
+            },
+            StatusID: {
+              type: 'number',
+              description: 'Optional: New status ID',
+            },
+            ResponsibleUID: {
+              type: 'string',
+              description: 'Optional: New responsible user UID',
+            },
+            Title: {
+              type: 'string',
+              description: 'Optional: Issue title',
+            },
+            Description: {
+              type: 'string',
+              description: 'Optional: Issue description',
+            },
+            CategoryID: {
+              type: 'number',
+              description: 'Optional: Category ID',
+            },
+            PriorityID: {
+              type: 'number',
+              description: 'Optional: Priority ID',
+            },
+          },
+          required: ['Comments'],
         },
       },
       required: ['projectId', 'issueId', 'issueData'],

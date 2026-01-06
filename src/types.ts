@@ -137,6 +137,7 @@ export interface IssueAttribute {
  * Issue update parameters
  */
 export interface IssueUpdate {
+  Comments: string; // REQUIRED by API - creates feed entry documenting the change
   Title?: string;
   Description?: string;
   StatusID?: number;
@@ -153,7 +154,7 @@ export interface IssueUpdate {
  * Issue search parameters
  */
 export interface IssueSearch {
-  ProjectID?: number;
+  ProjectIDs?: number[];  // Changed from ProjectID (singular) to ProjectIDs (plural array) - API requirement
   SearchText?: string;
   MaxResults?: number;
   StatusIDs?: number[];

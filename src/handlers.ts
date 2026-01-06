@@ -214,12 +214,15 @@ export class ToolHandlers {
     // Strip to minimal fields for search results (88% size reduction)
     projects = projects.map(p => this.stripToMinimalFields(p));
 
-    // Truncate if necessary
-    const { data, truncated, message } = truncateToTokenLimit(projects);
+    // Truncate if necessary to stay within token limits
+    const { data, truncated, message, originalCount, returnedCount } = truncateToTokenLimit(projects);
 
+    // If truncated, add informative message as a comment at the end of JSON
+    // (JSON allows trailing text after parsing, and this won't break JSON parsing)
     let responseText = JSON.stringify(data, null, 2);
-    if (message) {
-      responseText = `${message}\n\n${responseText}`;
+    if (truncated && message) {
+      // Add message after JSON in a comment-style format
+      responseText += `\n\n# ${message}`;
     }
 
     return {
@@ -239,12 +242,15 @@ export class ToolHandlers {
     // Strip to minimal fields for browsing (same as search - 91.5% size reduction)
     projects = projects.map(p => this.stripToMinimalFields(p));
 
-    // Truncate if necessary
-    const { data, truncated, message } = truncateToTokenLimit(projects);
+    // Truncate if necessary to stay within token limits
+    const { data, truncated, message, originalCount, returnedCount } = truncateToTokenLimit(projects);
 
+    // If truncated, add informative message as a comment at the end of JSON
+    // (JSON allows trailing text after parsing, and this won't break JSON parsing)
     let responseText = JSON.stringify(data, null, 2);
-    if (message) {
-      responseText = `${message}\n\n${responseText}`;
+    if (truncated && message) {
+      // Add message after JSON in a comment-style format
+      responseText += `\n\n# ${message}`;
     }
 
     return {
@@ -365,7 +371,7 @@ export class ToolHandlers {
     const client = this.getClient(args?.environment);
 
     const searchParams: any = {};
-    if (args?.projectId) searchParams.ProjectID = args.projectId;
+    if (args?.projectId) searchParams.ProjectIDs = [args.projectId];  // API requires ProjectIDs (plural, array)
     if (args?.searchText) searchParams.SearchText = args.searchText;
     if (args?.maxResults) searchParams.MaxResults = args.maxResults;
     if (args?.statusIDs) searchParams.StatusIDs = args.statusIDs;
@@ -380,12 +386,15 @@ export class ToolHandlers {
     // Strip to minimal fields for search results (80-90% size reduction)
     issues = issues.map(i => this.stripToMinimalIssueFields(i));
 
-    // Truncate if necessary
-    const { data, truncated, message } = truncateToTokenLimit(issues);
+    // Truncate if necessary to stay within token limits
+    const { data, truncated, message, originalCount, returnedCount } = truncateToTokenLimit(issues);
 
+    // If truncated, add informative message as a comment at the end of JSON
+    // (JSON allows trailing text after parsing, and this won't break JSON parsing)
     let responseText = JSON.stringify(data, null, 2);
-    if (message) {
-      responseText = `${message}\n\n${responseText}`;
+    if (truncated && message) {
+      // Add message after JSON in a comment-style format
+      responseText += `\n\n# ${message}`;
     }
 
     return {
